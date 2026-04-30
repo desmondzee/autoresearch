@@ -49,7 +49,7 @@ def _find_keyword_conflicts(markdown: str) -> list[tuple[str, str, str]]:
 
     # Pattern 1: Explicit SHALL vs SHALL NOT on same subject
     shall_pattern = re.compile(
-        r"(?:the\s+)?(\w+(?:\s+\w+)?)\s+(shall(?!\s+not)|must(?!\s+not))\s+(.+?)(?:\.|$)",
+        r"(?:the\s+)?(\w+(?:\s+\w+)?)\s+(shall(?!\s+not\b)|must(?!\s+not\b))\s+(.+?)(?:\.|$)",
         re.IGNORECASE | re.MULTILINE,
     )
     shall_not_pattern = re.compile(
@@ -98,8 +98,8 @@ def _find_keyword_conflicts(markdown: str) -> list[tuple[str, str, str]]:
             b_words = set(re.findall(r"\b\w{4,}\b", act_b.lower()))
             common = a_words & b_words
             if len(common) >= 2:  # Share meaningful terms
-                a_negated = "not" in act_a.lower() or "NOT " in act_a
-                b_negated = "not" in act_b.lower() or "NOT " in act_b
+                a_negated = bool(re.search(r"\bnot\b", act_a, re.IGNORECASE)) or "NOT " in act_a
+                b_negated = bool(re.search(r"\bnot\b", act_b, re.IGNORECASE)) or "NOT " in act_b
                 if a_negated != b_negated:
                     conflicts.append(("(cross-req)", req_a[:60], req_b[:60]))
 
