@@ -244,8 +244,9 @@ def _mutate_passive_voice_flood(eval_input: EvalInput) -> EvalInput:
     """Convert active voice requirements to passive voice."""
     md = eval_input.generated_spec.markdown
     replacements = [
-        (r"The system SHALL", "It is required that"),
         (r"The system SHALL NOT", "It is not permitted that"),
+        (r"the system SHALL NOT", "it is not permitted that"),
+        (r"The system SHALL", "It is required that"),
         (r"the system SHALL", "it is required that"),
     ]
     for pattern, replacement in replacements:

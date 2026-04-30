@@ -49,7 +49,7 @@ def _find_keyword_conflicts(markdown: str) -> list[tuple[str, str, str]]:
 
     # Pattern 1: Explicit SHALL vs SHALL NOT on same subject
     shall_pattern = re.compile(
-        r"(?:the\s+)?(\w+(?:\s+\w+)?)\s+(shall|must)\s+(.+?)(?:\.|$)",
+        r"(?:the\s+)?(\w+(?:\s+\w+)?)\s+(shall(?!\s+not)|must(?!\s+not))\s+(.+?)(?:\.|$)",
         re.IGNORECASE | re.MULTILINE,
     )
     shall_not_pattern = re.compile(

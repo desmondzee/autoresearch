@@ -161,11 +161,10 @@ def evaluate_dimension_ensemble(
     # Normalise to 0-1
     normalised = (median_score - 1) / 4.0
 
-    # Compute inter-judge agreement if 2+ judges
+    # Per-dimension kappa is degenerate with 1 item per judge.
+    # Meaningful kappa requires accumulation across multiple dimensions;
+    # see run_tier2_eval() which computes aggregate kappa post-hoc.
     kappa = None
-    if len(scores) >= 2:
-        # Pairwise kappa between first two judges
-        kappa = _cohens_kappa([scores[0]], [scores[1]])
 
     diagnostics = []
     if median_score <= 2:
@@ -199,6 +198,20 @@ def run_tier2_eval(
 
     for dim in config.dimensions:
         results[dim] = evaluate_dimension_ensemble(dim, eval_input, config)
+
+    # Compute aggregate inter-judge kappa across all dimensions
+    if len(config.providers) >= 2 and len(results) >= 2:
+        judge_a_scores: list[int] = []
+        judge_b_scores: list[int] = []
+        for ds in results.values():
+            raw = ds.details.get("raw_scores", [])
+            if len(raw) >= 2:
+                judge_a_scores.append(raw[0])
+                judge_b_scores.append(raw[1])
+        if len(judge_a_scores) >= 2:
+            agg_kappa = _cohens_kappa(judge_a_scores, judge_b_scores)
+            for ds in results.values():
+                ds.details["inter_judge_kappa"] = agg_kappa
 
     return results
 
